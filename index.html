@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Uppy AWS S3 Example</title>
+ <link href="https://releases.transloadit.com/uppy/v3.23.0/uppy.min.css" rel="stylesheet">
+</head>
+<body>
+ <div id="uppy"></div>
+
+ <script src="https://releases.transloadit.com/uppy/v3.23.0/uppy.min.js"></script>
+ <script>
+ document.addEventListener('DOMContentLoaded', function () {
+ var uppy = new Uppy.Uppy()
+ .use(Uppy.Dashboard, {
+ inline: true,
+ target: '#uppy',
+ proudlyDisplayPoweredByUppy: false,
+ })
+ .use(Uppy.AwsS3, {
+ getUploadParameters(file) {
+ return fetch('sign.php', {
+ method: 'POST',
+ headers: {
+ 'Content-Type': 'application/json',
+ },
+ body: JSON.stringify({
+ filename: file.name,
+ contentType: file.type,
+ }),
+ })
+ .then((response) => response.json())
+ .then((data) => {
+ return {
+ method: data.method,
+ url: data.url,
+ fields: data.fields,
+ };
+ });
+ },
+ });
+
+ uppy.on('complete', (result) => {
+ console.log('Upload complete:', result);
+ });
+ });
+ </script>
+</body>
+</html>
